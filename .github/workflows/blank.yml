@@ -1,19 +1,19 @@
-name: CI
+name: Deploy
 
 on:
   push:
     branches:
-      - main
+      - main  # Deploy on pushes to the main branch
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
+      - name: Set up Node.js (or your environment)
         uses: actions/setup-node@v2
         with:
           node-version: '14'
@@ -21,16 +21,18 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run tests
-        run: npm test
+      - name: Build application
+        run: npm run build
 
-      - name: Report status
-        if: success()
-        run: echo "Build succeeded!"
-
-      - name: Report status
-        if: failure()
-        run: echo "Build failed!"
+      - name: Deploy to Server (e.g., using SSH)
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          source: "dist/*"
+          target: "/path/on/server"
 
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
